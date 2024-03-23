@@ -27,6 +27,6 @@ public class IdentifierValidator extends AbstractValidator<Identifier, String> {
             return notRequired();
         }
 
-        return ValidatorUtils.AlphaNumber.matches(value);
+        return ValidatorUtils.Identifier.matches(value);
     }
 }

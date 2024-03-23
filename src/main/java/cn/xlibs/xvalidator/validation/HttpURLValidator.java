@@ -28,6 +28,6 @@ public class HttpURLValidator extends AbstractValidator<HttpURL, String> {
             return notRequired();
         }
 
-        return ValidatorUtils.HttpURL.matches(value);
+        return ValidatorUtils.HttpUrl.matches(value);
     }
 }

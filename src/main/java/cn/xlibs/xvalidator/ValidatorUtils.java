@@ -15,6 +15,28 @@ import java.util.regex.Pattern;
 public class ValidatorUtils {
     private ValidatorUtils(){ /* NO Sonar */ }
 
+    private static final Pattern IDENTITY_PATTERN = Pattern.compile("^[_a-zA-Z][_a-zA-Z0-9]*$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+    private static final Pattern HTTPURL_PATTERN = Pattern.compile("^(?i)https?://(www\\.)?[-A-Z0-9@:%._+~#=]{1,256}\\.[A-Z0-9()]{1,6}\\b([-A-Z0-9()@:%_+.~#?&/=]*)"
+        , Pattern.CASE_INSENSITIVE);
+    private static final Pattern IDC15_PATTERN = Pattern.compile(
+        "^"
+             + "\\d{6}" // 6位地区码
+             + "\\d{2}" // 2位年份
+             + "((0[1-9])|(10|11|12))" // 2位月份
+             + "(([0-2][1-9])|10|20|30|31)" // 2位日期
+             + "\\d{3}"// 3位顺序码
+             + "$");
+    private static final Pattern IDC18_PATTERN = Pattern.compile(
+        "^"
+        + "\\d{6}" // 6位地区码
+        + "(18|19|([23]\\d))\\d{2}" // 4位年份
+        + "((0[1-9])|(10|11|12))" // 2位月份
+        + "(([0-2][1-9])|10|20|30|31)" // 2位日期
+        + "\\d{3}" // 3位顺序码
+        + "[0-9Xx]" // 1位校验码
+        + "$");
+
     public static class Phone {
         private Phone(){ /* NO Sonar */ }
 
@@ -27,8 +49,7 @@ public class ValidatorUtils {
         private Email(){ /* NO Sonar */ }
 
         public static boolean matches(String value) {
-            return Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b")
-                    .matcher(value).matches();
+            return EMAIL_PATTERN.matcher(value).matches();
         }
     }
 
@@ -37,8 +58,7 @@ public class ValidatorUtils {
 
         public static boolean matches(String value) {
             try {
-                return verify(value.length() == 15 ?
-                        upgrade(value) : value);
+                return verify(value.length() == 15 ? upgrade(value) : value);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -47,25 +67,12 @@ public class ValidatorUtils {
         }
 
         private static boolean verify(String value) {
-            return Pattern.compile("^"
-                    + "\\d{6}" // 6位地区码
-                    + "(18|19|([23]\\d))\\d{2}" // 4位年份
-                    + "((0[1-9])|(10|11|12))" // 2位月份
-                    + "(([0-2][1-9])|10|20|30|31)" // 2位日期
-                    + "\\d{3}" // 3位顺序码
-                    + "[0-9Xx]" // 1位校验码
-                    + "$").matcher(value).matches() &&
+            return IDC18_PATTERN.matcher(value).matches() &&
                     value.charAt(17) == cvc(value);
         }
 
         private static String upgrade(String value) {
-            if(Pattern.compile("^"
-                    + "\\d{6}" // 6位地区码
-                    + "\\d{2}" // 4位年份
-                    + "((0[1-9])|(10|11|12))" // 2位月份
-                    + "(([0-2][1-9])|10|20|30|31)" // 2位日期
-                    + "\\d{3}"// 3位顺序码
-                    + "$").matcher(value).matches()) {
+            if(IDC15_PATTERN.matcher(value).matches()) {
                 String nv = value.substring(0, 6) + "19"
                         + value.substring(6);
                 return nv + cvc(nv);
@@ -126,21 +133,19 @@ public class ValidatorUtils {
         }
     }
 
-    public static class HttpURL {
-        private HttpURL(){ /* NO Sonar */ }
+    public static class HttpUrl {
+        private HttpUrl(){ /* NO Sonar */ }
 
         public static boolean matches(String value) {
-            return Pattern.compile("^https?://(?:www\\.)?[\\w.-]+\\.[a-zA-Z]{2,}(?:/\\S*)?$"
-                    , Pattern.CASE_INSENSITIVE).matcher(value).matches();
+            return HTTPURL_PATTERN.matcher(value).matches();
         }
     }
 
-    public static class AlphaNumber {
-        private AlphaNumber(){ /* NO Sonar */ }
+    public static class Identifier {
+        private Identifier(){ /* NO Sonar */ }
 
         public static boolean matches(String value) {
-            return Pattern.compile("^[a-zA-Z][a-zA-Z0-9]*$")
-                    .matcher(value).matches();
+            return IDENTITY_PATTERN.matcher(value).matches();
         }
     }
 }
